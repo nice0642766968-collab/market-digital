@@ -1,0 +1,19 @@
+body { font-family: 'Tahoma', sans-serif; background: #f0f2f5; margin: 0; padding: 0; }
+header { background: #2c3e50; color: white; text-align: center; padding: 15px; }
+.main-layout { display: flex; gap: 20px; padding: 20px; max-width: 1200px; margin: auto; }
+
+.card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+.sidebar { width: 300px; height: fit-content; }
+.content { flex-grow: 1; }
+
+input, select, textarea { width: 100%; margin-bottom: 10px; padding: 10px; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; }
+.btn-main { width: 100%; background: #27ae60; color: white; border: none; padding: 10px; cursor: pointer; border-radius: 5px; }
+
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; }
+.product-card { background: white; padding: 15px; border-radius: 8px; border-top: 5px solid #f39c12; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+
+/* Chat Style */
+.chat-window { position: fixed; bottom: 20px; right: 20px; width: 300px; height: 400px; display: flex; flex-direction: column; z-index: 100; }
+.chat-header { display: flex; justify-content: space-between; font-weight: bold; border-bottom: 1px solid #eee; padding-bottom: 10px; }
+.chat-messages { flex-grow: 1; overflow-y: auto; margin: 10px 0; font-size: 14px; }
+.chat-input { display: flex; gap: 5px; }

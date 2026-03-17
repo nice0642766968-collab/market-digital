@@ -1,80 +1,89 @@
 const firebaseConfig = {
-  apiKey: "AIzaSyAmbzRxqYFti6IEksy2WunKCVa_v8Gg0F0",
-  authDomain: "market-digital-3d10e.firebaseapp.com",
-  projectId: "market-digital-3d10e",
-  storageBucket: "market-digital-3d10e.firebasestorage.app",
-  messagingSenderId: "368580098929",
-  appId: "1:368580098929:web:7e005211ceb83b3b9794d0",
-  measurementId: "G-Q985QSMDDT"
+    apiKey: "AIzaSyAmbzRxqYFti6IEksy2WunKCVa_v8Gg0F0",
+    authDomain: "market-digital-3d10e.firebaseapp.com",
+    projectId: "market-digital-3d10e",
+    storageBucket: "market-digital-3d10e.firebasestorage.app",
+    messagingSenderId: "368580098929",
+    appId: "1:368580098929:web:7e005211ceb83b3b9794d0",
+    measurementId: "G-Q985QSMDDT"
 };
 
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-// 1. ระบบลงประกาศสินค้า
+// 1. จัดการประกาศสินค้า
 document.getElementById('btnPost').addEventListener('click', () => {
-    const data = {
-        name: document.getElementById('itemName').value,
-        price: Number(document.getElementById('itemPrice').value),
-        category: document.getElementById('itemCategory').value,
-        detail: document.getElementById('itemDetail').value,
-        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-    };
+    const name = document.getElementById('itemName').value;
+    const price = Number(document.getElementById('itemPrice').value);
+    const cat = document.getElementById('itemCategory').value;
+    const detail = document.getElementById('itemDetail').value;
 
-    if(data.name && data.price) {
-        db.collection("products").add(data).then(() => alert("ประกาศขายสำเร็จ!"));
+    if(name && price) {
+        db.collection("cru_products").add({
+            name, price, category: cat, detail,
+            time: firebase.firestore.FieldValue.serverTimestamp()
+        }).then(() => {
+            togglePostModal();
+            alert("ลงประกาศเรียบร้อย!");
+        });
     }
 });
 
-// 2. ดึงรายการสินค้ามาแสดง
-db.collection("products").orderBy("createdAt", "desc").onSnapshot(snapshot => {
-    const list = document.getElementById('marketList');
-    list.innerHTML = '';
+// 2. แสดงรายการสินค้าแบบ Real-time
+db.collection("cru_products").orderBy("time", "desc").onSnapshot(snapshot => {
+    const market = document.getElementById('marketList');
+    market.innerHTML = '';
     snapshot.forEach(doc => {
         const item = doc.data();
-        list.innerHTML += `
+        market.innerHTML += `
             <div class="product-card">
-                <small>${item.category}</small>
-                <h4>${item.name}</h4>
-                <p>ราคา: <b>${item.price}.-</b></p>
-                <button onclick="openChat('${doc.id}', '${item.name}')">💬 ติดต่อ</button>
+                <div class="product-info">
+                    <span class="category-badge">${item.category}</span>
+                    <h3>${item.name}</h3>
+                    <p style="color:#666; font-size:0.9rem;">${item.detail}</p>
+                    <div class="price-tag">฿${item.price.toLocaleString()}</div>
+                    <button onclick="startChat('${doc.id}', '${item.name}')" class="btn-post-nav" style="width:100%; margin-top:10px;">ติดต่อสอบถาม</button>
+                </div>
             </div>
         `;
     });
 });
 
-// 3. ระบบแ chat
-let currentChatId = "";
+// 3. ระบบแชท
+let currentRoomId = "";
 
-function openChat(productId, productName) {
-    currentChatId = productId;
-    document.getElementById('chatSection').style.display = 'flex';
-    document.getElementById('chatWith').innerText = "คุยเรื่อง: " + productName;
-    loadMessages(productId);
-}
-
-function loadMessages(id) {
+function startChat(id, title) {
+    currentRoomId = id;
+    document.getElementById('chatBox').style.display = 'flex';
+    document.getElementById('chatTitle').innerText = title;
+    
+    // โหลดข้อความ
     db.collection("chats").doc(id).collection("messages").orderBy("time")
-    .onSnapshot(snapshot => {
-        const box = document.getElementById('chatMessages');
-        box.innerHTML = '';
-        snapshot.forEach(m => {
-            const msg = m.data();
-            box.innerHTML += `<div><b>Student:</b> ${msg.text}</div>`;
+    .onSnapshot(snap => {
+        const display = document.getElementById('msgDisplay');
+        display.innerHTML = '';
+        snap.forEach(m => {
+            const data = m.data();
+            display.innerHTML += `<div class="msg"><b>นักศึกษา:</b> ${data.text}</div>`;
         });
-        box.scrollTop = box.scrollHeight;
+        display.scrollTop = display.scrollHeight;
     });
 }
 
 document.getElementById('btnSend').addEventListener('click', () => {
-    const text = document.getElementById('msgText').value;
-    if(text && currentChatId) {
-        db.collection("chats").doc(currentChatId).collection("messages").add({
+    const text = document.getElementById('chatInput').value;
+    if(text && currentRoomId) {
+        db.collection("chats").doc(currentRoomId).collection("messages").add({
             text: text,
             time: firebase.firestore.FieldValue.serverTimestamp()
         });
-        document.getElementById('msgText').value = '';
+        document.getElementById('chatInput').value = '';
     }
 });
 
-function closeChat() { document.getElementById('chatSection').style.display = 'none'; }
+function togglePostModal() {
+    const m = document.getElementById('postModal');
+    m.style.display = m.style.display === 'flex' ? 'none' : 'flex';
+}
+
+function closeChat() { document.getElementById('chatBox').style.display = 'none'; }

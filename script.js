@@ -1,89 +1,48 @@
-const firebaseConfig = {
-    apiKey: "AIzaSyAmbzRxqYFti6IEksy2WunKCVa_v8Gg0F0",
-    authDomain: "market-digital-3d10e.firebaseapp.com",
-    projectId: "market-digital-3d10e",
-    storageBucket: "market-digital-3d10e.firebasestorage.app",
-    messagingSenderId: "368580098929",
-    appId: "1:368580098929:web:7e005211ceb83b3b9794d0",
-    measurementId: "G-Q985QSMDDT"
-};
+// ฟังก์ชันคำนวณค่าหารอัตโนมัติใน Modal
+function calculateSplit() {
+    const price = document.getElementById('itemPrice').value;
+    const count = document.getElementById('splitCount').value;
+    const resultDiv = document.getElementById('splitResult');
 
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
-
-// 1. จัดการประกาศสินค้า
-document.getElementById('btnPost').addEventListener('click', () => {
-    const name = document.getElementById('itemName').value;
-    const price = Number(document.getElementById('itemPrice').value);
-    const cat = document.getElementById('itemCategory').value;
-    const detail = document.getElementById('itemDetail').value;
-
-    if(name && price) {
-        db.collection("cru_products").add({
-            name, price, category: cat, detail,
-            time: firebase.firestore.FieldValue.serverTimestamp()
-        }).then(() => {
-            togglePostModal();
-            alert("ลงประกาศเรียบร้อย!");
-        });
+    if (price && count > 0) {
+        const perPerson = (price / count).toLocaleString();
+        resultDiv.innerText = `ราคาต่อคน: ฿${perPerson}`;
+        resultDiv.style.color = "#1a237e";
+    } else {
+        resultDiv.innerText = `ราคาต่อคน: ฿0`;
     }
-});
+}
 
-// 2. แสดงรายการสินค้าแบบ Real-time
-db.collection("cru_products").orderBy("time", "desc").onSnapshot(snapshot => {
-    const market = document.getElementById('marketList');
-    market.innerHTML = '';
-    snapshot.forEach(doc => {
-        const item = doc.data();
-        market.innerHTML += `
-            <div class="product-card">
-                <div class="product-info">
-                    <span class="category-badge">${item.category}</span>
-                    <h3>${item.name}</h3>
-                    <p style="color:#666; font-size:0.9rem;">${item.detail}</p>
-                    <div class="price-tag">฿${item.price.toLocaleString()}</div>
-                    <button onclick="startChat('${doc.id}', '${item.name}')" class="btn-post-nav" style="width:100%; margin-top:10px;">ติดต่อสอบถาม</button>
-                </div>
-            </div>
-        `;
-    });
-});
+// ระบบจัดการการเข้าสู่ระบบ (Firebase Auth)
+function handleLogin() {
+    const email = document.getElementById('loginEmail').value;
+    const pass = document.getElementById('loginPassword').value;
 
-// 3. ระบบแชท
-let currentRoomId = "";
-
-function startChat(id, title) {
-    currentRoomId = id;
-    document.getElementById('chatBox').style.display = 'flex';
-    document.getElementById('chatTitle').innerText = title;
-    
-    // โหลดข้อความ
-    db.collection("chats").doc(id).collection("messages").orderBy("time")
-    .onSnapshot(snap => {
-        const display = document.getElementById('msgDisplay');
-        display.innerHTML = '';
-        snap.forEach(m => {
-            const data = m.data();
-            display.innerHTML += `<div class="msg"><b>นักศึกษา:</b> ${data.text}</div>`;
-        });
-        display.scrollTop = display.scrollHeight;
+    firebase.auth().signInWithEmailAndPassword(email, pass)
+    .then((userCredential) => {
+        document.getElementById('authContainer').style.display = 'none';
+        document.getElementById('appContainer').style.display = 'block';
+    })
+    .catch((error) => {
+        alert("เข้าสู่ระบบไม่สำเร็จ: " + error.message);
     });
 }
 
-document.getElementById('btnSend').addEventListener('click', () => {
-    const text = document.getElementById('chatInput').value;
-    if(text && currentRoomId) {
-        db.collection("chats").doc(currentRoomId).collection("messages").add({
-            text: text,
-            time: firebase.firestore.FieldValue.serverTimestamp()
-        });
-        document.getElementById('chatInput').value = '';
+// ตรวจสอบสถานะการ Login เมื่อโหลดหน้าเว็บ
+firebase.auth().onAuthStateChanged((user) => {
+    if (user) {
+        document.getElementById('authContainer').style.display = 'none';
+        document.getElementById('appContainer').style.display = 'block';
+    } else {
+        document.getElementById('authContainer').style.display = 'flex';
+        document.getElementById('appContainer').style.display = 'none';
     }
 });
 
-function togglePostModal() {
-    const m = document.getElementById('postModal');
-    m.style.display = m.style.display === 'flex' ? 'none' : 'flex';
+function handleLogout() {
+    firebase.auth().signOut();
 }
 
-function closeChat() { document.getElementById('chatBox').style.display = 'none'; }
+// ฟังก์ชันเปิด/ปิด Modal
+function openModal() { document.getElementById('postModal').style.display = 'flex'; }
+function closeModal() { document.getElementById('postModal').style.display = 'none'; }

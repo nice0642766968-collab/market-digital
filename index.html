@@ -3,45 +3,66 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CRU Digital Market & Chat</title>
+    <title>CRU Digital Market | ตลาดนัดจันทรเกษม</title>
     <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600&display=swap" rel="stylesheet">
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
 </head>
 <body>
-    <header>
-        <h1>🌙 CRU Digital Market</h1>
-    </header>
+    <nav class="navbar">
+        <div class="nav-container">
+            <h2 class="logo">🌙 CRU <span>Market</span></h2>
+            <div class="nav-menu">
+                <button class="btn-post-nav" onclick="togglePostModal()">+ ลงประกาศ</button>
+            </div>
+        </div>
+    </nav>
 
-    <div class="main-layout">
-        <aside class="sidebar card">
+    <div class="container">
+        <div class="category-bar">
+            <button class="cat-btn active" onclick="filterCategory('ทั้งหมด')">ทั้งหมด</button>
+            <button class="cat-btn" onclick="filterCategory('วิทยาศาสตร์')">วิทย์</button>
+            <button class="cat-btn" onclick="filterCategory('วิทยาการจัดการ')">จัดการ</button>
+            <button class="cat-btn" onclick="filterCategory('มนุษยศาสตร์')">มนุษย์</button>
+            <button class="cat-btn" onclick="filterCategory('ศึกษาศาสตร์')">ครู</button>
+            <button class="cat-btn" onclick="filterCategory('นิติศาสตร์')">นิติ</button>
+        </div>
+
+        <section class="market-grid" id="marketList">
+            </section>
+    </div>
+
+    <div id="postModal" class="modal">
+        <div class="modal-content">
             <h3>📢 ลงประกาศใหม่</h3>
             <input type="text" id="itemName" placeholder="ชื่อสินค้า/บริการ">
             <input type="number" id="itemPrice" placeholder="ราคา (บาท)">
             <select id="itemCategory">
-                <option value="ทั่วไป">หมวดหมู่ทั้งหมด</option>
+                <option value="ทั่วไป">เลือกคณะ/หมวดหมู่</option>
                 <option value="วิทยาศาสตร์">คณะวิทยาศาสตร์</option>
-                <option value="ศึกษาศาสตร์">คณะศึกษาศาสตร์</option>
                 <option value="วิทยาการจัดการ">คณะวิทยาการจัดการ</option>
                 <option value="มนุษยศาสตร์">คณะมนุษยศาสตร์</option>
+                <option value="ศึกษาศาสตร์">คณะศึกษาศาสตร์</option>
+                <option value="นิติศาสตร์">คณะนิติศาสตร์</option>
             </select>
-            <textarea id="itemDetail" placeholder="รายละเอียด..."></textarea>
-            <button id="btnPost" class="btn-main">โพสต์ประกาศ</button>
-        </aside>
-
-        <main class="content">
-            <div id="marketList" class="grid"></div>
-        </main>
-
-        <section id="chatSection" class="chat-window card" style="display:none;">
-            <div class="chat-header">
-                <span id="chatWith">แชท</span>
-                <button onclick="closeChat()">X</button>
+            <textarea id="itemDetail" placeholder="รายละเอียดสินค้า..."></textarea>
+            <div class="modal-btns">
+                <button onclick="togglePostModal()" class="btn-cancel">ยกเลิก</button>
+                <button id="btnPost" class="btn-confirm">ลงประกาศเลย</button>
             </div>
-            <div id="chatMessages" class="chat-messages"></div>
-            <div class="chat-input">
-                <input type="text" id="msgText" placeholder="พิมพ์ข้อความ...">
-                <button id="btnSend">ส่ง</button>
-            </div>
-        </section>
+        </div>
+    </div>
+
+    <div id="chatBox" class="chat-container" style="display:none;">
+        <div class="chat-header">
+            <span id="chatTitle">คุยกับผู้ขาย</span>
+            <button onclick="closeChat()">×</button>
+        </div>
+        <div id="msgDisplay" class="msg-display"></div>
+        <div class="chat-input-area">
+            <input type="text" id="chatInput" placeholder="พิมพ์ข้อความ...">
+            <button id="btnSend">ส่ง</button>
+        </div>
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-app-compat.js"></script>
